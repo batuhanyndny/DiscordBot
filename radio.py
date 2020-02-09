@@ -1,10 +1,13 @@
+import urllib
+import urllib.request
+import requests
+import discord as dc
+import os
+import sys
+import bs4
+import datetime
+
 def play_radio(station, stop_t):
-    import urllib
-    import urllib.request
-    import requests
-    import discord as dc
-    import os
-    import sys
     def NiceToICY(self):
         class InterceptedHTTPResponse():
             pass
@@ -21,16 +24,48 @@ def play_radio(station, stop_t):
 
     STATIONS = {
         "PAL_FM" : 'http://shoutcast.radyogrup.com:1030/',
-        "LALEGUL" : 'http://live46.netmedya.net:443/lalegulfm?/'
+        "LALEGUL" : 'http://live46.netmedya.net:443/lalegulfm?/',
+        "ROCK" : "http://stream.rockfm.com.tr:9450/;"
     }
 
+    print("RUNNINGG")
     r = requests.get(STATIONS[station], stream=True)
     with open('stream.mp3', 'wb') as f:
         for block in r.iter_content(1024):
             f.write(block)
-            print(stop_t())
             if stop_t():
                 sys.stdout.flush()
                 r.close()
                 f.close()
-                os.remove("stream.mp3") 
+                os.remove("stream.mp3")
+
+def get_cuma_saati():
+    URL = "https://namazvakitleri.diyanet.gov.tr/tr-TR/9541/istanbul-icin-namaz-vakti"
+    headers = {
+        "User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:69.0) Gecko/20100101 Firefox/69.0"
+    }
+
+    page = requests.get(URL, headers=headers)
+    soup = bs4.BeautifulSoup(page.content, 'html.parser')
+    table = soup.find('table')
+    haftalik  = []
+
+    for row in table.findAll('tr')[1:250]:
+        col = row.findAll('td')
+        saat = col[3].getText()
+        haftalik.append(saat)
+
+    cuma = haftalik[4]
+    return cuma.split(':')
+
+
+
+
+
+
+
+
+
+
+
+
